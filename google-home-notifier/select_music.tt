@@ -69,3 +69,4 @@ function selectMusicFile(str){
     };
 }
 
+exports.selectMusicFile = selectMusicFile;
