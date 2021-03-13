@@ -1,0 +1,71 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="Microsoft.VisualBasic" #>
+<#@ import namespace="Microsoft.VisualBasic.FileIO" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".js" #>
+
+<#
+	
+	List<string[]> readResults = new List<string[]>();
+
+	using var parser = new TextFieldParser("./music_source.csv", Encoding.GetEncoding("SHIFT-JIS"));
+	
+	parser.TextFieldType = FieldType.Delimited;
+	parser.Delimiters = new[] { "," };
+	parser.HasFieldsEnclosedInQuotes = true;
+	parser.TrimWhiteSpace = true;
+	while (parser.EndOfData == false)
+	{
+		string[] fields = parser.ReadFields();
+		readResults.Add(fields);
+		
+		foreach(var f in fields) Console.WriteLine(f);
+	}
+
+	parser.Close();
+#>
+
+const musicData = [
+<#
+	foreach(var line in readResults){
+#>
+	{
+		filename: '<#= line[0] #>',
+		comment:'<#= line[1] #>',
+        	keys:[
+			'<#= line[0].Replace(".mp3","") #>',
+<#
+			for(int i=2; i<line.Length; i++){
+				if(line[i]=="") continue;
+#>
+			'<#= line[i] #>',
+<#
+			}
+#>
+		]
+	},
+<#
+	}
+#>
+];
+
+function selectMusicFile(str){
+    for(i=0; i < musicData.length; i++){
+        if(musicData[i].filename == str || musicData[i].comment == str) return musicData[i];
+        var keys = musicData[i].keys;
+        for(j=0;j<keys.length; j++){
+            if(str == keys[j]){
+                return musicData[i];
+            }
+        }
+    }
+    return {
+        filename:null,
+        comment:null,
+    };
+}
+
