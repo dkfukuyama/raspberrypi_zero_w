@@ -1,7 +1,7 @@
 console.log(process.argv);
 
 const split_str = "@";
-
+const split_str_cal = "___";
 const input = process.argv[2];
 
 const { exec } = require('child_process');
@@ -23,7 +23,8 @@ async function get_ip(){
     return new Promise((resolve, reject) => {
         // 自分のIPアドレスを取得するためのlinuxコマンドを呼び出す。
         ip = "0.0.0.0";
-        exec("ip -4 a show wlan0 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'", (err, stdout, stderr) => {
+        //exec("ip -4 a show wlan0 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'", (err, stdout, stderr) => {
+        exec("node /home/pi/google-home-notifier/getip.js", (err, stdout, stderr) => {
             ip=stdout.trim();
             console.log(ip);
             resolve();
@@ -101,8 +102,6 @@ async function main_func(){
         await notify(playFileObj.comment, function(res, d) { console.log(res); duration = d.media.duration; });
         await Promise.all([gip, sleep(duration, null)]);
         // 変数ipには自分のIPアドレスが入る。
-        // 厳密には、IPアドレス取得完了を待ってから変数を使用しなければならない。
-        // 前段のnotify関数のawaitで並列でipアドレス取得が十分に間に合うので一旦この方式で進める。
 	const dataServerAddress = ip;
 	const dataServerPort = svr_prt;
 
@@ -129,10 +128,32 @@ async function main_func(){
         await sleep(duration, null);
         console.log('process.exit(0);');
         process.exit(0);
-    }else if(mode == "cal"){
+    }else if(mode == "cal"){ // カレンダーモードのとき
         console.log("calendar mode");
 
-        await notify(message , function(res, d) { console.log(res); duration = d.media.duration; });
+        const splitted_cal = message.split(split_str_cal);
+        let speak_contents = "";
+
+        let regexresults = undefined;
+        if(splitted_cal[1].match(/(Calendar)(.*)(updated)/i)){
+            speak_contents += "予定の更新をお知らせします。。。";
+        }else if(splitted_cal[1].startsWith("New calendar event created")){
+            speak_contents += "新しい予定が登録されました。。。";
+        }else if(splitted_cal[1].startsWith("Calendar event was cancelled")){
+            speak_contents += "予定の取り消しをお知らせします。。。";
+    
+        }else if(results = splitted_cal[1].match(/Event starting in (\d+?) minutes:/i)){
+            speak_contents += "予定の開始は" + results[1] + "分後。。。"
+        }
+
+        speak_contents += "予定の内容は。。" + splitted_cal[2] + "。。。";
+
+        const time_str = splitted_cal[0].split(splitted_cal[2] + ": ")[1];
+
+        results = time_str.match(/(.+?) from (\d{2}):(\d{2}) to (\d{2}):(\d{2})/i);
+        speak_contents += "日付は" + results[1] + "。。開始時刻は" + results[2] + "時" + results[3] + "分です"
+
+        await notify(speak_contents, function(res, d) { console.log(res); duration = d.media.duration; });
         await sleep(duration, null);
         console.log('process.exit(0);');
         process.exit(0);
