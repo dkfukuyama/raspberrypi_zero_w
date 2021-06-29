@@ -78,6 +78,11 @@ var getPlayUrl = function(url, host, callback) {
     });
 };
 
+var g_status = "NONE";
+const STAT_PLAYING = "PLAYING";
+const STAT_IDLE = "IDLE";
+const STAT_PAUSED = "PAUSED";
+
 var onDeviceUp = function(host, url, callback) {
   var client = new Client();
   client.connect(host, function() {
@@ -89,9 +94,43 @@ var onDeviceUp = function(host, url, callback) {
         streamType: 'BUFFERED' // or LIVE
         //streamType: 'LIVE' // or BUFFERED
       };
-      player.load(media, { autoplay: true }, function(err, status) {
-        client.close();
-        callback('Device notified', status);
+
+      player.load(media, { autoplay: true}, function(err, status) {
+        if(status.hasOwnProperty('playerState')){
+          console.log('media loaded playerState=%s', status.playerState);
+          if(status.playerState == STAT_PLAYING){
+            g_status = STAT_PLAYING;
+          }
+        }else{
+          console.log('media loaded playerState=%s', "unexisted");
+        }
+      
+      });
+      player.on('status', function(status) {
+        console.log('status broadcast playerState=%s', status.playerState);
+
+        if(g_status == STAT_PLAYING && status.playerState == STAT_IDLE){
+          g_status = STAT_IDLE;
+          client.close();
+          callback('close');
+        }else if(status.playerState == STAT_PAUSED){
+          client.close();
+          callback('PAUSED close');
+        }else if(g_status == STAT_PLAYING && status.playerState == STAT_PLAYING){
+          if(status.hasOwnProperty('media') && status.media.hasOwnProperty('duration')){
+            let d = status.media.duration * 1000 + 1000;
+            console.log(d);
+            setTimeout(()=>{
+              try{
+                client.close();
+              }catch{}
+              finally{
+                callback('TIME OUT close');
+              }
+            }, d);
+          }
+        }
+
       });
     });
   });

@@ -23,7 +23,6 @@ async function get_ip(){
     return new Promise((resolve, reject) => {
         // 自分のIPアドレスを取得するためのlinuxコマンドを呼び出す。
         ip = "0.0.0.0";
-        //exec("ip -4 a show wlan0 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'", (err, stdout, stderr) => {
         exec("node /home/pi/google-home-notifier/getip.js", (err, stdout, stderr) => {
             ip=stdout.trim();
             console.log(ip);
