@@ -23,7 +23,6 @@ async function get_ip(){
     return new Promise((resolve, reject) => {
         // 自分のIPアドレスを取得するためのlinuxコマンドを呼び出す。
         ip = "0.0.0.0";
-        //exec("ip -4 a show wlan0 | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'", (err, stdout, stderr) => {
         exec("node /home/pi/google-home-notifier/getip.js", (err, stdout, stderr) => {
             ip=stdout.trim();
             console.log(ip);
@@ -76,9 +75,12 @@ async function main_func(){
 
     // param-1@param-2@param-3を所定の区切り文字で分割
     const mode = splitted_input[0];
-    const message = splitted_input[1];
+    const message = splitted_input[1].toString();
     const options = splitted_input[2];
 
+    console.log("MESSAGE ::: " + message);
+
+    var duration = 0;
     if(mode == "music"){ // 音楽再生モードのとき
         console.log("play music mode");
 
@@ -86,16 +88,13 @@ async function main_func(){
         var playFileObj = require('./select_music').selectMusicFile(message.replace(/\s/g, ''));
         console.log(playFileObj);
 
-        
         if(playFileObj.filename == null){
             await notify("みんなのおんがくにしっぱいしました。「　" + message + "　」。 なんて曲はないよ" , function(res, d) { console.log(res); duration = d.media.duration; });
             await sleep(duration, null);
             console.log('process.exit(0);');
             process.exit(0);
         }
-        
 
-        var duration = 0;
         var media_data;
 
         // mp3再生前に読み上げる所定の文字列
@@ -108,7 +107,6 @@ async function main_func(){
         // 再生するmp3ファイルのURLを設定する。
         var reqStr = 'http://' + dataServerAddress  + ':' + dataServerPort + '/' + playFileObj.filename;
         console.log(reqStr);
-
         // 指定したmp3ファイルをgoogle homeから再生する命令。
         await play(reqStr, function(res, d) { 
             console.log(res);
@@ -118,43 +116,56 @@ async function main_func(){
                 console.log(d);
             }
         });
-        await sleep(duration, null);
+        await sleep(duration + 5, null);
         console.log('process.exit(0);');
         process.exit(0);
     }else if(mode == "tts"){ // テキスト読み上げモードのとき
         console.log("text to speech mode");
 
         await notify(message , function(res, d) { console.log(res); duration = d.media.duration; });
-        await sleep(duration, null);
+        console.log("duration = " + duration);
+        await sleep(duration + 5, null);
         console.log('process.exit(0);');
         process.exit(0);
     }else if(mode == "cal"){ // カレンダーモードのとき
         console.log("calendar mode");
 
         const splitted_cal = message.split(split_str_cal);
-        let speak_contents = "";
 
+        console.log("splitted_cal :: ");
+        console.log(splitted_cal);
+
+
+        let speak_contents = "";
         let regexresults = undefined;
+        let regexresults2 = undefined;
+
         if(splitted_cal[1].match(/(Calendar)(.*)(updated)/i)){
             speak_contents += "予定の更新をお知らせします。。。";
         }else if(splitted_cal[1].startsWith("New calendar event created")){
             speak_contents += "新しい予定が登録されました。。。";
         }else if(splitted_cal[1].startsWith("Calendar event was cancelled")){
             speak_contents += "予定の取り消しをお知らせします。。。";
-    
-        }else if(results = splitted_cal[1].match(/Event starting in (\d+?) minutes:/i)){
-            speak_contents += "予定の開始は" + results[1] + "分後。。。"
+        }else if(regexresults = splitted_cal[1].match(/Event starting in (\d+?) minutes:/i)){
+            speak_contents += "予定の開始は" + regexresults[1] + "分後。。。"
         }
 
         speak_contents += "予定の内容は。。" + splitted_cal[2] + "。。。";
 
-        const time_str = splitted_cal[0].split(splitted_cal[2] + ": ")[1];
+        console.log(speak_contents);
 
-        results = time_str.match(/(.+?) from (\d{2}):(\d{2}) to (\d{2}):(\d{2})/i);
-        speak_contents += "日付は" + results[1] + "。。開始時刻は" + results[2] + "時" + results[3] + "分です"
+        let time_str = splitted_cal[0].split(splitted_cal[2] + ": ")[1];
 
+        console.log("time_str : " + time_str);
+        regexresults2 = time_str.match(/<\!date\^(\d*?)\^.*?\|.*?>/i);
+        var dt = new Date(parseInt(regexresults2[1],0) * 1000);
+
+        speak_contents += "開始日時は。" + (dt.getMonth()+1) + "月" + dt.getDate() + "日" + dt.getHours() + "時" + dt.getMinutes() + "分";
+        console.log(speak_contents);
         await notify(speak_contents, function(res, d) { console.log(res); duration = d.media.duration; });
-        await sleep(duration, null);
+        console.log("duration = " + duration);
+        await gip;
+        await sleep(duration + 5, null);
         console.log('process.exit(0);');
         process.exit(0);
         
@@ -162,7 +173,9 @@ async function main_func(){
 }
 
 main_func();
+/*
 setTimeout(() => {
     console.log('process.exit(1);');
     process.exit(1);
 }, 30000);
+*/
