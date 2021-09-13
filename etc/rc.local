@@ -1,0 +1,31 @@
+#!/bin/sh 
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# Print the IP address
+_IP=$(hostname -I) || true
+if [ "$_IP" ]; then
+  printf "My IP address is %s\n" "$_IP"
+fi
+
+bash -c 'exit 99' # とりあえず、実行結果$?に正常終了0以外を入れる
+echo $?
+while [ "$?" != "0" ]  # 実行結果$?が0でないとき、すなわちpingが失敗している間はwhileを繰り返し実行する。
+do
+  echo $?
+  sleep 5  # とりあえず、5秒休み
+  ping LANDISK-201129.local -c 1  # pingを1回送信する。
+done # while文の終了
+
+sudo mount -t cifs //LANDISK-201129.local/disk1/music /mnt/nas_music -o username=pi,password=,file_mode=0755,dir_mode=0755,iocharset=utf8,uid=1000,gid=1000
+
+exit 0

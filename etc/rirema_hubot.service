@@ -1,0 +1,11 @@
+[Unit]
+Description=pibot service
+
+[Service]
+ExecStart=/home/pi/hubot/pibot/bin/run_hubot.sh
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+

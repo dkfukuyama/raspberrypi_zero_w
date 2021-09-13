@@ -72,7 +72,7 @@ var getSpeechUrl = function(text, host, callback) {
 };
 
 var getPlayUrl = function(url, host, callback) {
-    console.log(url);
+    //console.log(url);
     onDeviceUp(host, url, function(res, d){
       callback(res, d)
     });
@@ -89,17 +89,9 @@ var onDeviceUp = function(host, url, callback) {
         streamType: 'BUFFERED' // or LIVE
         //streamType: 'LIVE' // or BUFFERED
       };
-
-      player.on('status', function(status) {
-        console.log('status broadcast playerState=%s', status.playerState);
-        console.log(status);
-      });
-      
-      console.log('app "%s" launched, loading media %s ...', player.session.displayName, media.contentId);
-
       player.load(media, { autoplay: true }, function(err, status) {
+        client.close();
         callback('Device notified', status);
-        //client.close();
       });
     });
   });

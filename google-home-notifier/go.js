@@ -101,8 +101,8 @@ async function main_func(){
         await notify(playFileObj.comment, function(res, d) { console.log(res); duration = d.media.duration; });
         await Promise.all([gip, sleep(duration, null)]);
         // 変数ipには自分のIPアドレスが入る。
-	const dataServerAddress = ip;
-	const dataServerPort = svr_prt;
+	    const dataServerAddress = ip;
+	    const dataServerPort = svr_prt;
 
         // 再生するmp3ファイルのURLを設定する。
         var reqStr = 'http://' + dataServerAddress  + ':' + dataServerPort + '/' + playFileObj.filename;
@@ -168,7 +168,14 @@ async function main_func(){
         await sleep(duration + 5, null);
         console.log('process.exit(0);');
         process.exit(0);
-        
+    }else if(mode == "sys"){ // システムモードのとき
+        const { exec } = require('child_process');
+        exec(message, (err, stdout, stderr) => {
+            console.log(stdout);
+            console.log(stderr);
+            console.log(err);
+        });
+        process.exit(0);
     }
 }
 

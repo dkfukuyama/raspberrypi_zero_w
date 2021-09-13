@@ -1,0 +1,12 @@
+[Unit]
+Description=mp3 server for google nest
+ 
+[Service]
+ExecStart=node /home/pi/google-home-notifier/pi_webserver.js /mnt/nas_music
+Restart=always
+RestartSec=5
+Type=simple
+WorkingDirectory=/home/pi/google-home-notifier/
+ 
+[Install]
+WantedBy=multi-user.target
