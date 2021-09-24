@@ -174,15 +174,9 @@ async function main_func(){
             console.log(stdout);
             console.log(stderr);
             console.log(err);
+            process.exit(0);
         });
-        process.exit(0);
     }
 }
 
 main_func();
-/*
-setTimeout(() => {
-    console.log('process.exit(1);');
-    process.exit(1);
-}, 30000);
-*/
