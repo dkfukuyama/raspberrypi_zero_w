@@ -1,8 +1,13 @@
 html
   head
     title= title
+    script
   body
     h1= message
   ul
     each val in mlist
-      p #{val.comment}
+      form(action="/show_music_list/" method="post")
+        p #{val.comment} 
+          input(type="hidden" name="mp3" value=`${val.filename}`)
+          button(type="submit") おんがくをきく
+  a(href="/") こんにちはグーグルさんに戻る

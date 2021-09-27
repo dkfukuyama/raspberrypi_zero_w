@@ -1,0 +1,29 @@
+html
+  head
+    title= title
+    script
+  body
+    h1 #{whois}のもんだいをつくるよ
+
+    h2 あたらしいもんだいをつくる 
+    form(action="/make_quiz/" method="post")
+      
+      input(type="hidden" name="type" value="make_new")
+      ul
+        textarea(name="main_phrase" rows="6" cols="40" value="もんだいをかいてね") もんだいをかいてね
+      ul
+        P せいかいのこたえ
+          input(type="text" name="exact" value="せいかいのせんたくし")
+      ul
+        P まちがい１
+          input(type="text" name="wrong1" value="まちがいのせんたくし１")
+      ul
+        P まちがい２
+          input(type="text" name="wrong2" value="まちがいのせんたくし２")
+
+      input(type="hidden" name="whois" value=`${whois}`)
+      Button(type="submit" name="mode" value="test_run1") デバッグ（もんだいをためしてみる）
+
+    form(action="/make_quiz/" method="post")
+      Button(type="submit" name="whois" value="") もんだいをつくるひとをえらびなおす
+  a(href="/") こんにちはグーグルさんに戻る
