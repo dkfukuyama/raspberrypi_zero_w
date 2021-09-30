@@ -69,4 +69,9 @@ function selectMusicFile(str){
     };
 }
 
+function showMusicList(){
+	return musicData;
+}
+
 exports.selectMusicFile = selectMusicFile;
+exports.showMusicList = showMusicList;

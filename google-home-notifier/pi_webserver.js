@@ -91,60 +91,44 @@ async function main(){
   });
 
   app.all('/make_quiz/', function(req, res) {
-    console.log(req.body)
+    //console.log(req.body)
     if(!req.body.whois){
       res.render('make_quiz_select_whois', { title: 'クイズの問題を作るよ。', message: 'もんだいをつくるのはだれですか？'});
     }else{
-      res.render('make_quiz', { title: 'クイズの問題を作るよ。', whois: req.body.whois});
-      if(req.body.mode == 'test_run1'){
-        let text = 
-          req.body.whois
-           + 'からのもんだいだよ。。'
-           + req.body.main_phrase
-           + '。。。。つぎのみっつのなかからえらんでね。。。';
-          
-        let ar = [req.body.wrong1, req.body.wrong2];
-        if(Math.floor(Math.random() * 2)){
-          ar = ar.reverse();
-        }
-        let e_num = Math.floor(Math.random() * 3) + 1;
-        switch(e_num)
-        {
-          case 1:
-            ar = [req.body.exact, ar[0], ar[1]];
-            break;
-          case 2:
-            ar = [ar[0], req.body.exact, ar[1]];
-            break;
-          default :
-            ar = [ar[0], ar[1], req.body.exact];
-        }
-        text += '。。。いち。。' + ar[0];
-        text += '。。。に。。' + ar[1];
-        text += '。。。さん。。' + ar[2];
-        text += '。。。。。こたえは。' + e_num + 'だよ';
 
-        console.log(text);
+      var fs = require('fs');
+      const allDirents = fs.readdirSync(quiz_path,  { withFileTypes: true });
+      const fileNames = allDirents.filter(dirent => dirent.isFile()).map(({ name }) => name).filter((file)=>/.*\.json$/.test(file));
+      console.log(fileNames);
+
+      res.render('make_quiz', { title: 'クイズの問題を作るよ。', whois: req.body.whois});
+
+      if(req.body.mode == 'register'){
+        console.log('問題を登録する');
+        delete req.body.type;
+        delete req.body.mode;
+        req.body.date = new Date();
+        let out_text = JSON.stringify(req.body, null, "\t");
+
+        fs.writeFile("file1.txt", data, (err) => {
+          if (err) throw err;
+          console.log('正常に書き込みが完了しました');
+        });
+
+      }else if(req.body.mode == 'test_run1'){
+        const quiz_lib = require('./quiz_lib');
+        const text = quiz_lib.make_speech_text(req.body);
+
         if(process.env.HOMEDRIVE != 'C:'){
           exec('node /home/pi/google-home-notifier/go.js tts@' + text + '@', (error, stdout, stderr)=> {
             console.log(stdout);
             console.log(error);
           });
+        }else{
+          console.log(text);
+
         }
       }
-      /*
-      var fs = require('fs');
-      fs.readdir(quiz_path, function(err, files){
-        if (err) throw err;
-        var fileList = [];
-        files.filter(function(file){
-            return fs.statSync(file).isFile() && /.*\.json$/.test(file); //絞り込み
-        }).forEach(function (file) {
-            fileList.push(file);
-        });
-        console.log(fileList);
-      });
-      */
     }
   });
 

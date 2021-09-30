@@ -5,6 +5,8 @@ html
   body
     h1 #{whois}のもんだいをつくるよ
 
+    h2 いま、とうろくされているもんだいだよ
+
     h2 あたらしいもんだいをつくる 
     form(action="/make_quiz/" method="post")
       
@@ -13,17 +15,21 @@ html
         textarea(name="main_phrase" rows="6" cols="40" value="もんだいをかいてね") もんだいをかいてね
       ul
         P せいかいのこたえ
-          input(type="text" name="exact" value="せいかいのせんたくし")
+          input(type="text" name="exact" value="せいかい")
       ul
         P まちがい１
-          input(type="text" name="wrong1" value="まちがいのせんたくし１")
+          input(type="text" name="wrong1" value="まちがい１")
       ul
         P まちがい２
-          input(type="text" name="wrong2" value="まちがいのせんたくし２")
+          input(type="text" name="wrong2" value="まちがい２")
 
       input(type="hidden" name="whois" value=`${whois}`)
-      Button(type="submit" name="mode" value="test_run1") デバッグ（もんだいをためしてみる）
+      P
+        Button(type="submit" name="mode" value="register") 問題を登録する
+      P
+        Button(type="submit" name="mode" value="test_run1") デバッグ（もんだいをためしてみる）
 
+    hr
     form(action="/make_quiz/" method="post")
       Button(type="submit" name="whois" value="") もんだいをつくるひとをえらびなおす
   a(href="/") こんにちはグーグルさんに戻る
