@@ -10,11 +10,11 @@ async function get_port_number(){
     if(process.env.HOMEDRIVE != 'C:'){
       exec("cat /etc/sysconfig/pi", (err, stdout, stderr) => {
         svr_prt=stdout.trim().replace('MP3_SERVER_PORT=','');
-        //console.log(svr_prt);
+        quiz_path = path + '/quiz/';
         resolve();
       });
     }else{
-      quiz_path = '//LANDISK-201129/disk1/music/quiz/'
+      quiz_path = '//LANDISK-201129/disk1/music/quiz/';
       svr_prt=8091;
       resolve();
     }
@@ -27,6 +27,20 @@ function sleep(waitSec) {
       setTimeout(function() { resolve() }, waitSec);
   });
 } 
+
+var fs = require('fs');
+function getExistingFileNames(searchPath){
+  const allDirents = fs.readdirSync(searchPath,  { withFileTypes: true });
+  const existingFileNames = allDirents.filter(dirent => dirent.isFile()).map(({ name }) => name).filter((file)=>/.*\.json$/.test(file));
+  return existingFileNames;
+}
+
+function createWriteFilePath(data, searchPath){
+  //getExistingFileNames();
+  let indexStr = Math.floor(Math.random() * 10).toString().padStart(2, '0');
+
+  return searchPath + indexStr + '_rika.json';
+}
 
 async function main(){
   await get_port_number();
@@ -93,13 +107,16 @@ async function main(){
   app.all('/make_quiz/', function(req, res) {
     //console.log(req.body)
     if(!req.body.whois){
+
       res.render('make_quiz_select_whois', { title: 'クイズの問題を作るよ。', message: 'もんだいをつくるのはだれですか？'});
     }else{
+      let existingFileNames = getExistingFileNames(quiz_path);
+      const result = {};
+      existingFileNames.forEach((obj) => {
+        result[obj] = JSON.parse(fs.readFileSync(quiz_path + obj, 'utf8'));
+      });
 
-      var fs = require('fs');
-      const allDirents = fs.readdirSync(quiz_path,  { withFileTypes: true });
-      const fileNames = allDirents.filter(dirent => dirent.isFile()).map(({ name }) => name).filter((file)=>/.*\.json$/.test(file));
-      console.log(fileNames);
+      console.log(result);
 
       res.render('make_quiz', { title: 'クイズの問題を作るよ。', whois: req.body.whois});
 
@@ -109,8 +126,9 @@ async function main(){
         delete req.body.mode;
         req.body.date = new Date();
         let out_text = JSON.stringify(req.body, null, "\t");
-
-        fs.writeFile("file1.txt", data, (err) => {
+        
+        let writeFilePath = createWriteFilePath(req.body, quiz_path);
+        fs.writeFile(writeFilePath, out_text, (err) => {
           if (err) throw err;
           console.log('正常に書き込みが完了しました');
         });
