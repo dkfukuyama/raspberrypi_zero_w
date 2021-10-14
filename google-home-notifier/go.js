@@ -75,7 +75,7 @@ async function main_func(){
 
     // param-1@param-2@param-3を所定の区切り文字で分割
     const mode = splitted_input[0];
-    const message = splitted_input[1].toString();
+    const message = splitted_input[1];
     const options = splitted_input[2];
 
     console.log("MESSAGE ::: " + message);
