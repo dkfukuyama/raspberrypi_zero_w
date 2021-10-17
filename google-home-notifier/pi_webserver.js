@@ -4,7 +4,6 @@ const { exec } = require('child_process');
 var svr_prt = 0;
 var quiz_path = '';
 
-
 async function get_port_number(){
   return new Promise((resolve, reject) => {
     if(process.env.HOMEDRIVE != 'C:'){
@@ -21,26 +20,11 @@ async function get_port_number(){
   });
 }
 
-
 function sleep(waitSec) {
   return new Promise(function (resolve) {
       setTimeout(function() { resolve() }, waitSec);
   });
 } 
-
-var fs = require('fs');
-function getExistingFileNames(searchPath){
-  const allDirents = fs.readdirSync(searchPath,  { withFileTypes: true });
-  const existingFileNames = allDirents.filter(dirent => dirent.isFile()).map(({ name }) => name).filter((file)=>/.*\.json$/.test(file));
-  return existingFileNames;
-}
-
-function createWriteFilePath(data, searchPath){
-  //getExistingFileNames();
-  let indexStr = Math.floor(Math.random() * 10).toString().padStart(2, '0');
-
-  return searchPath + indexStr + '_rika.json';
-}
 
 async function main(){
   await get_port_number();
@@ -65,7 +49,6 @@ async function main(){
   });
   
   app.get('/speech/:phrase', function(req, res) {
-    //const { exec } = require('child_process');
     exec('node /home/pi/google-home-notifier/go.js tts@' + req.params.phrase + '@', (error, stdout, stderr)=> {
       console.log(stdout);
       console.log(error);
@@ -110,11 +93,7 @@ async function main(){
 
       res.render('make_quiz_select_whois', { title: 'クイズの問題を作るよ。', message: 'もんだいをつくるのはだれですか？'});
     }else{
-      let existingFileNames = getExistingFileNames(quiz_path);
-      const result = {};
-      existingFileNames.forEach((obj) => {
-        result[obj] = JSON.parse(fs.readFileSync(quiz_path + obj, 'utf8'));
-      });
+      getExistingFileNamesToJsonString(req.body.whois, quiz_path);
 
       console.log(result);
 
@@ -127,7 +106,7 @@ async function main(){
         req.body.date = new Date();
         let out_text = JSON.stringify(req.body, null, "\t");
         
-        let writeFilePath = createWriteFilePath(req.body, quiz_path);
+        let writeFilePath = createWriteFilePath(req.body.whois, quiz_path);
         fs.writeFile(writeFilePath, out_text, (err) => {
           if (err) throw err;
           console.log('正常に書き込みが完了しました');
