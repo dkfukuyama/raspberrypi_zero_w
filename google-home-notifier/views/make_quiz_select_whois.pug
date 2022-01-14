@@ -9,4 +9,6 @@ html
             Button(type="submit" name="whois" value="りか") りか
             Button(type="submit" name="whois" value="れいな") れいな
             Button(type="submit" name="whois" value="まさのり") まさのり
-  a(href="/") こんにちはグーグルさんに戻る
+    form(action="/make_quiz/" method="post")
+      Button(type="submit" name="mode" value="random_debug") つくってあるもんだいのどれかひとつをためす 
+    a(href="/") こんにちはグーグルさんに戻る

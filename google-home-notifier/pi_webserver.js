@@ -1,6 +1,8 @@
 const path = process.argv[2];
 
 const { exec } = require('child_process');
+const qf = require('./quiz_lib');
+
 var svr_prt = 0;
 var quiz_path = '';
 
@@ -90,31 +92,9 @@ async function main(){
   app.all('/make_quiz/', function(req, res) {
     //console.log(req.body)
     if(!req.body.whois){
-
-      res.render('make_quiz_select_whois', { title: 'クイズの問題を作るよ。', message: 'もんだいをつくるのはだれですか？'});
-    }else{
-      getExistingFileNamesToJsonString(req.body.whois, quiz_path);
-
-      console.log(result);
-
-      res.render('make_quiz', { title: 'クイズの問題を作るよ。', whois: req.body.whois});
-
-      if(req.body.mode == 'register'){
-        console.log('問題を登録する');
-        delete req.body.type;
-        delete req.body.mode;
-        req.body.date = new Date();
-        let out_text = JSON.stringify(req.body, null, "\t");
-        
-        let writeFilePath = createWriteFilePath(req.body.whois, quiz_path);
-        fs.writeFile(writeFilePath, out_text, (err) => {
-          if (err) throw err;
-          console.log('正常に書き込みが完了しました');
-        });
-
-      }else if(req.body.mode == 'test_run1'){
-        const quiz_lib = require('./quiz_lib');
-        const text = quiz_lib.make_speech_text(req.body);
+      if(req.body.mode == 'random_debug'){
+        console.log('random_debug');
+        let text = qf.randomDebug(quiz_path);
 
         if(process.env.HOMEDRIVE != 'C:'){
           exec('node /home/pi/google-home-notifier/go.js tts@' + text + '@', (error, stdout, stderr)=> {
@@ -123,9 +103,34 @@ async function main(){
           });
         }else{
           console.log(text);
+        }
 
+      }
+      res.render('make_quiz_select_whois', { title: 'クイズの問題を作るよ。', message: 'もんだいをつくるのはだれですか？'});
+    }else{
+      if(req.body.mode == 'register'){
+          console.log('問題を登録する');
+          qf.registerNewFile(req.body, quiz_path)
+      } else if (req.body.mode == 'delete') {
+        console.log('delete mode');
+        console.log(req.body.filename);
+        qf.deleteFile(req.body.filename, quiz_path);
+        
+      }else if(req.body.mode == 'test_run1'){
+        const text = qf.make_speech_text(req.body);
+
+        if(process.env.HOMEDRIVE != 'C:'){
+          exec('node /home/pi/google-home-notifier/go.js tts@' + text + '@', (error, stdout, stderr)=> {
+            console.log(stdout);
+            console.log(error);
+          });
+        }else{
+          console.log(text);
         }
       }
+
+      let result = qf.getExistingFileNamesToJsonString(req.body.whois, quiz_path);
+      res.render('make_quiz', { title: 'クイズの問題を作るよ。', quiz:result, whois: req.body.whois});
     }
   });
 
