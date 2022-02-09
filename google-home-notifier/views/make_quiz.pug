@@ -1,0 +1,49 @@
+html
+  head
+    title= title
+    script
+  body
+    h1 #{whois}のもんだいをつくるよ
+    if quiz.length != 0
+      h2 いま、とうろくされているもんだいだよ
+      each val in quiz
+        form(action="/make_quiz/" method="post")
+          p もんだい：#{val.main_phrase}
+          p せいかい：#{val.exact}
+          p まちがい１：#{val.wrong1}
+          p まいがい２：#{val.wrong2}
+          input(type="hidden" name="whois" value=`${whois}`)
+          input(type="hidden" name="filename" value=`${val.filename}`)
+          Button(type="submit" name="mode" value="delete") このもんだいをけす
+          hr
+    else
+      h2 いま、とうろくされているもんだいはないよ
+
+    if quiz.length < 10
+      h2 あたらしいもんだいをつくる 
+      form(action="/make_quiz/" method="post")
+        
+        input(type="hidden" name="type" value="make_new")
+        ul
+          textarea(name="main_phrase" rows="6" cols="40" value="もんだいをかいてね") もんだいをかいてね
+        ul
+          P せいかいのこたえ
+            input(type="text" name="exact" value="せいかい")
+        ul
+          P まちがい１
+            input(type="text" name="wrong1" value="まちがい１")
+        ul
+          P まちがい２
+            input(type="text" name="wrong2" value="まちがい２")
+
+        input(type="hidden" name="whois" value=`${whois}`)
+        P
+          Button(type="submit" name="mode" value="register") 問題を登録する
+        P
+          Button(type="submit" name="mode" value="test_run1") デバッグ１（もんだいをためしてみる）
+    else
+      h2 これいじょうもんだいをつくれないよ。つくってあるもんだいをけしてからためしてね。
+      hr
+    form(action="/make_quiz/" method="post")
+      Button(type="submit" name="whois" value="") もんだいをつくるひとをえらびなおす
+  a(href="/") こんにちはグーグルさんに戻る

@@ -1,0 +1,14 @@
+html
+  head
+    title= title
+    script
+  body
+    h1= message
+    form(action="/make_quiz/" method="post")
+        ul
+            Button(type="submit" name="whois" value="りか") りか
+            Button(type="submit" name="whois" value="れいな") れいな
+            Button(type="submit" name="whois" value="まさのり") まさのり
+    form(action="/make_quiz/" method="post")
+      Button(type="submit" name="mode" value="random_debug") つくってあるもんだいのどれかひとつをためす 
+    a(href="/") こんにちはグーグルさんに戻る

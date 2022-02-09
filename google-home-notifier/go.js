@@ -75,7 +75,7 @@ async function main_func(){
 
     // param-1@param-2@param-3を所定の区切り文字で分割
     const mode = splitted_input[0];
-    const message = splitted_input[1].toString();
+    const message = splitted_input[1];
     const options = splitted_input[2];
 
     console.log("MESSAGE ::: " + message);
@@ -159,6 +159,7 @@ async function main_func(){
         console.log("time_str : " + time_str);
         regexresults2 = time_str.match(/<\!date\^(\d*?)\^.*?\|.*?>/i);
         var dt = new Date(parseInt(regexresults2[1],0) * 1000);
+        dt.setHours(dt.getHours() + 9);
 
         speak_contents += "開始日時は。" + (dt.getMonth()+1) + "月" + dt.getDate() + "日" + dt.getHours() + "時" + dt.getMinutes() + "分";
         console.log(speak_contents);
@@ -174,15 +175,9 @@ async function main_func(){
             console.log(stdout);
             console.log(stderr);
             console.log(err);
+            process.exit(0);
         });
-        process.exit(0);
     }
 }
 
 main_func();
-/*
-setTimeout(() => {
-    console.log('process.exit(1);');
-    process.exit(1);
-}, 30000);
-*/
